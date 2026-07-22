@@ -1,5 +1,7 @@
 import { useState, lazy, Suspense, type ComponentType } from 'react';
+import { AnimatedBackground } from './components/AnimatedBackground';
 import { useTheme } from './hooks/useTheme';
+import { LicenseProvider, useLicense } from './licensing/LicenseProvider';
 
 const HomePage = lazy(() => import('./pages/HomePage').then((m) => ({ default: m.HomePage })));
 const GeneratePage = lazy(() => import('./pages/GeneratePage').then((m) => ({ default: m.GeneratePage })));
@@ -110,16 +112,51 @@ const PAGE_COMPONENTS: Record<Page, ComponentType> = {
 };
 
 export default function App() {
+  return <LicenseProvider productKey="QRFlow"><AppInner /></LicenseProvider>;
+}
+
+function AppInner() {
   const [page, setPage] = useState<Page>('home');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { isDark, toggle } = useTheme();
+  const { isPro, loading: proLoading, setShowProModal } = useLicense();
 
   const PageComponent = PAGE_COMPONENTS[page];
 
   return (
     <>
-      <aside style={sidebarStyle}>
+      <AnimatedBackground />
+      <button className="mobile-hamburger" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu"
+        style={{ position: 'fixed', top: '0.75rem', left: '0.75rem', zIndex: 110, display: 'none', alignItems: 'center', justifyContent: 'center', width: '40px', height: '40px', borderRadius: 'var(--radius-md)', background: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text)', cursor: 'pointer' }}>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          {mobileMenuOpen ? (
+            <><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></>
+          ) : (
+            <><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></>
+          )}
+        </svg>
+      </button>
+      {mobileMenuOpen && (
+        <div onClick={() => setMobileMenuOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 90 }}
+          className="mobile-overlay" />
+      )}
+      <aside style={sidebarStyle} className={'sidebar-nav' + (mobileMenuOpen ? ' open' : '')}>
         <div style={logoArea}>
           <span style={logoText}>QRFlow</span>
+          {!proLoading && (
+            <span style={{
+              fontSize: '0.625rem',
+              fontWeight: 600,
+              padding: '0.125rem 0.375rem',
+              borderRadius: 'var(--radius-sm)',
+              background: isPro ? 'var(--color-success-light)' : 'var(--color-warning-light)',
+              color: isPro ? 'var(--color-success)' : 'var(--color-warning)',
+              textTransform: 'uppercase',
+              letterSpacing: '0.04em',
+            }}>
+              {isPro ? 'Pro' : 'Free'}
+            </span>
+          )}
         </div>
 
         <nav style={navStyle}>
@@ -127,7 +164,7 @@ export default function App() {
             <button
               key={p.key}
               style={page === p.key ? navItemActive : navItemBase}
-              onClick={() => setPage(p.key)}
+              onClick={() => { setPage(p.key); setMobileMenuOpen(false); }}
               onMouseEnter={(e) => {
                 if (page !== p.key) {
                   (e.target as HTMLButtonElement).style.background = 'var(--color-surface-secondary)';
@@ -146,6 +183,23 @@ export default function App() {
         </nav>
 
         <div style={sidebarBottom}>
+          {!isPro && (
+            <button
+              onClick={() => setShowProModal(true)}
+              style={{
+                ...navItemBase,
+                justifyContent: 'center',
+                gap: '8px',
+                marginBottom: '6px',
+                background: 'var(--color-primary)',
+                color: '#fff',
+                fontWeight: 600,
+              }}
+            >
+              <span>⭐</span>
+              Upgrade to Pro
+            </button>
+          )}
           <button
             style={themeBtn}
             onClick={toggle}
