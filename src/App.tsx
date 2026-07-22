@@ -225,6 +225,18 @@ function AppInner() {
             </svg>
             {isDark ? 'Dark Mode' : 'Light Mode'}
           </button>
+          <a
+            href="https://frteddz.github.io/Euthenia-Studio-Website/"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px',
+              padding: '6px 0', fontSize: '0.65rem', color: 'var(--color-text-tertiary)',
+              textDecoration: 'none', borderTop: '1px solid var(--color-border)', marginTop: '4px',
+            }}
+          >
+            Made by <span style={{ color: 'var(--color-accent)', fontWeight: 600 }}>Euthenia Studio</span>
+          </a>
         </div>
       </aside>
 
