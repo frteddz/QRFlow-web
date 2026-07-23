@@ -2,6 +2,8 @@
 
 > QR code generator and scanner — create and decode QR codes in seconds.
 
+This repository contains only the built distribution files. The source code is not publicly available.
+
 ## Features
 
 - Generate QR codes from any text, URL, or contact info
